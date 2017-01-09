@@ -94,6 +94,6 @@ samples/
 
 # db settings
 db_dev.py
-
+dev.py
 # idea
 .idea/
