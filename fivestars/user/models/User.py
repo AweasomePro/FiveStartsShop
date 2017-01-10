@@ -19,7 +19,7 @@ class CustomUserManager(UserManager):
         """
         now = timezone.now()
         if not phone_number:
-            raise ValueError('The given username must be set')
+            raise ValueError('The given phone_number must be set')
         user = self.model(phone_number=phone_number, name=name,
                           is_staff=is_staff, is_active=True,
                           is_superuser=is_superuser, last_login=now,
@@ -28,6 +28,9 @@ class CustomUserManager(UserManager):
         user.save(using=self._db)
         return user
 
+    def create_superuser(self, phone_number, name, password, **extra_fields):
+        return self._create_user(phone_number, name, password, True, True,
+                                 **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -41,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                             help_text=_('Required. 254 characters or fewer. Letters, numbers and '
                                         '@/./+/-/_ characters'),
                             validators=[
-                                validators.RegexValidator(re.compile('^[\w.@+-]+$'), _('Enter a valid username.'),
+                                validators.RegexValidator(re.compile('^[\w.@+-]+$'), _('Enter a valid name.'),
                                                           'invalid')
                             ])
     email = models.EmailField(_('email address'), blank=True)
@@ -62,17 +65,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = _('users')
 
     def get_absolute_url(self):
-        return "/users/%s/" % urlquote(self.username)
+        return "/users/%s/" % urlquote(self.name)
 
     def get_full_name(self):
         """
         Returns the first_name plus the last_name, with a space in between.
         """
-        return "A user called %s" % self.username
+        return "A user called %s" % self.name
 
     def get_short_name(self):
         "Returns the short name for the user."
-        return self.username
+        return self.name
 
     def email_user(self, subject, message, from_email=None):
         """
